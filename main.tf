@@ -430,8 +430,8 @@ locals {
   webhook_url    = join("", aws_codepipeline_webhook.webhook.*.url)
 }
 
-resource "aws_codepipeline_webhook" "webhook" {
-  count           = module.this.enabled && var.webhook_enabled ? 1 : 0
+resource "aws_codepipeline_webhook" "default" {
+  count           = module.this.enabled && var.webhook_enabled && var.github_oauth_token != "" ? 1 : 0
   name            = module.codepipeline_label.id
   authentication  = var.webhook_authentication
   target_action   = var.webhook_target_action
@@ -447,11 +447,28 @@ resource "aws_codepipeline_webhook" "webhook" {
   }
 }
 
+resource "aws_codepipeline_webhook" "bitbucket" {
+  count           = module.this.enabled && var.webhook_enabled && local.codestar_enabled ? 1 : 0
+  name            = module.codepipeline_label.id
+  authentication  = var.webhook_authentication
+  target_action   = var.webhook_target_action
+  target_pipeline = join("", aws_codepipeline.bitbucket.*.name)
+
+  authentication_configuration {
+    secret_token = local.webhook_secret
+  }
+
+  filter {
+    json_path    = var.webhook_filter_json_path
+    match_equals = var.webhook_filter_match_equals
+  }
+}
+
 module "github_webhooks" {
   source  = "cloudposse/repository-webhooks/github"
   version = "0.13.0"
 
-  enabled              = module.this.enabled && var.webhook_enabled ? true : false
+  enabled              = module.this.enabled && var.webhook_enabled  && var.github_oauth_token ? true : false
   github_repositories  = [var.repo_name]
   webhook_url          = local.webhook_url
   webhook_secret       = local.webhook_secret
