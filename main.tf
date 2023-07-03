@@ -468,7 +468,7 @@ module "github_webhooks" {
   source  = "cloudposse/repository-webhooks/github"
   version = "0.13.0"
 
-  enabled              = module.this.enabled && var.webhook_enabled  && var.github_oauth_token ? true : false
+  enabled              = module.this.enabled && var.webhook_enabled  && var.github_oauth_token != "" ? true : false
   github_repositories  = [var.repo_name]
   webhook_url          = local.webhook_url
   webhook_secret       = local.webhook_secret
