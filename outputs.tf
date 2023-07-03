@@ -9,7 +9,7 @@ output "badge_url" {
 
 output "webhook_id" {
   description = "The CodePipeline webhook's ID"
-  value       = join("", aws_codepipeline_webhook.webhook.*.id)
+  value       = local.codestar_enabled ? join("", aws_codepipeline_webhook.bitbucket.*.id)  : join("", aws_codepipeline_webhook.default.*.id)
 }
 
 output "webhook_url" {
