@@ -427,7 +427,7 @@ resource "random_string" "webhook_secret" {
 
 locals {
   webhook_secret = join("", random_string.webhook_secret.*.result)
-  webhook_url    = join("", aws_codepipeline_webhook.webhook.*.url)
+  webhook_url    = local.codestar_enabled ? join("", aws_codepipeline_webhook.bitbucket.*.url)  : join("", aws_codepipeline_webhook.default.*.url)
 }
 
 resource "aws_codepipeline_webhook" "default" {
